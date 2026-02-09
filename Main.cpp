@@ -25,12 +25,6 @@ struct Person {
 	friend std::ostream& operator<<(std::ostream&, const Person&);
 };
 
-// Initialize a Person (Assigment requires this, so I added it just in case).
-static void InitPerson(Person* person, const std::string& name, const Vector<Book*>& booksWritten) {
-	person->name = name;		// Set the author's name.
-	person->booksWritten = booksWritten;		// Set author's books.
-}
-
 struct Book {
 	Person* author;				// Hold a pointer to the author to represent the author of the book.
 	std::string title;			// The title member is used to store the title of the book.
@@ -47,17 +41,6 @@ struct Book {
 
 	friend std::ostream& operator<<(std::ostream&, const Book&);		// Friend the output operator overload. This doesn't have to be done as this there are no private members, but it is good for if any private members are added.
 };
-
-// Function to initialize a Book. The assignment required a function like this, so here it is.
-static void InitBook(Book* book, Person* author, const std::string& title, uint32_t numPages) {
-	book->author = author;				// Set the book's author pointer.
-	book->title = title;				// Set the book's title member.
-	book->numberOfPages = numPages;		// Set the book's numberOfPages member.
-	// Check if the author is nullptr.
-	if (author) {
-		author->booksWritten.PushBack(book);		// Push the book to the back of the author's booksWritten Vector.
-	}
-}
 
 // Book Operator Overload: Output the formatted contents of the book to the given output stream.
 std::ostream& operator<<(std::ostream& os, const Book& book) {
