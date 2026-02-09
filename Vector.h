@@ -7,7 +7,7 @@
 /**********************************************************************
 * Class Name: Vector
 * Class Description:
-*	A custom dynamic array implementation that is similar to 
+*	A custom dynamic array implementation that is similar to
 *	std::vector.
 *	Supports copy/move semantics, dynamic resizing, and element access
 *	with bounds checking.
@@ -38,7 +38,6 @@ public:
 	// Constructor with size_t argument for capacity
 	// Allows for the user to allocate a certain amount of memory before using the Vector.
 	Vector(size_t capacity)
-		// Set m_Data to a new array of size capacity, set m_Capacity to the capacity, and set m_Size to 0 as there are no elements yet.
 		: m_Data(new T[capacity]), m_Capacity(capacity), m_Size(0) {
 	}
 
@@ -49,7 +48,7 @@ public:
 		: m_Data(new T[other.m_Capacity]), m_Capacity(other.m_Capacity), m_Size(other.m_Size) {
 		// Iterate over the other Vector's data array.
 		for (size_t i = 0; i < m_Size; ++i) {
-			assert(i < m_Capacity);		// Stupid assert to get rid of Intellisense warning. This can never happen.
+			assert(i < m_Capacity);		// Stupid assert to get rid of the nonsense Intellisense warning. This can never happen.
 			m_Data[i] = other.m_Data[i];		// Deep copy the other's data to the new Vector's data.
 		}
 	}
@@ -57,14 +56,13 @@ public:
 	// Move Constructor
 	// Allows for a vector to be created with std::move().
 	Vector(Vector&& other) noexcept
-		// Initialize the contents of the new Vector with the contents of the old one.
 		: m_Data(other.m_Data), m_Capacity(other.m_Capacity), m_Size(other.m_Size) {
 		// Reset the other vector's values.
 		other.m_Data = nullptr;
 		other.m_Capacity = 0;
 		other.m_Size = 0;
 	}
-	
+
 	// Basic = operator
 	// Allows for a vector to be copied using the equal operator.
 	Vector& operator=(const Vector& other) {
@@ -85,9 +83,9 @@ public:
 	// Allows for vectors to be moved using the equal operator.
 	Vector& operator=(Vector&& other) noexcept {
 		if (this == &other) return *this;		// If it is being set to itself, return the dereferenced this pointer instead of creating a new array.
-		
+
 		delete[] m_Data;		// Delete the old array.
-		
+
 		m_Data = other.m_Data;		// Directly copy the data pointer as the other Vector's data is set to nullptr.
 		m_Capacity = other.m_Capacity;		// Copy the capacity.
 		m_Size = other.m_Size;		// Copy the size.
@@ -98,7 +96,7 @@ public:
 
 		return *this;		// Return the dereferenced this pointer to allow for chained equals like vec1 = vec2 = std::move(vec3).
 	}
-	
+
 	// Destructor
 	// Prevents memory leaks by deleting the data array.
 	~Vector() {
@@ -107,19 +105,19 @@ public:
 		}
 	}
 
-	// Non-const [] operator
+	// Non-const [size_t] operator
 	// Allows for the Vector to be indexed and edited without bounds checking.
 	T& operator[](size_t idx) {
 		return m_Data[idx];		// Return the m_Data pointer at idx without bounds checking.
 	}
 
-	// Const [] operator
+	// Const [size_t] operator
 	// Allows for the Vector to be indexed without bounds checking.
 	const T& operator[](size_t idx) const {
 		return m_Data[idx];		// Return the m_Data pointer at idx without bounds checking.
 	}
 
-	// At() Function
+	// At(size_t) Function
 	// Allows for the Vector to be indexed and edited with bounds checking.
 	T& At(size_t idx) {
 		// Check that the Vector's size is less than the index given.
@@ -129,7 +127,7 @@ public:
 		return m_Data[idx];		// Return the m_Data pointer at idx with bounds checking.
 	}
 
-	// Const At() Function
+	// Const At(size_t) Function
 	// Allows for const Vector to be index with bounds checking.
 	const T& At(size_t idx) const {
 		// Check that the Vector's size is less than the index given.
@@ -139,7 +137,7 @@ public:
 		return m_Data[idx];		// Return the m_Data pointer at idx with bounds checking.
 	}
 
-	// PushBack() Function
+	// PushBack(const T&) Function
 	// Pushes a new element to the back of the Vector.
 	void PushBack(const T& value) {
 		// Check if the Vector has enough capacity to push back the element.
@@ -149,7 +147,7 @@ public:
 		m_Data[m_Size++] = value;		// Set m_Data at the previous size to value and increment m_Size.
 	}
 
-	// PushBack() Move Function
+	// PushBack(T&&) Move Function
 	// Pushes a moved element to the back of the Vector.
 	void PushBack(T&& value) {
 		// Check if the Vector has enough capacity to move the element to the back.
@@ -159,7 +157,7 @@ public:
 		m_Data[m_Size++] = std::move(value);		// Move the value to m_Data at the previous size and increment m_Size.
 	}
 
-	// PushFront() Function
+	// PushFront(const T&) Function
 	// Pushes a new element to the front of the Vector.
 	void PushFront(const T& value) {
 		// Check if the Vector has enough capacity to push the element to the front.
@@ -174,7 +172,7 @@ public:
 		m_Data[0] = value;		// Set the now free m_Data[0] to the given value.
 	}
 
-	// PushFront() Move Function
+	// PushFront(T&&) Move Function
 	// Pushes a moved element to the front of the Vector.
 	// Note: This function has an O(n) time complexity, and PushBack() should always be preferred for its O(1) time complexity.
 	void PushFront(T&& value) {
@@ -195,7 +193,7 @@ public:
 	T PopBack() {
 		// Check if m_Size is zero as there would be nothing to pop.
 		if (m_Size == 0) {
-			throw std::runtime_error("Vector Error: PopBack() called when size is equal to 0.");		// Throw a runtime error with the error message.
+			throw std::runtime_error("Vector Error: PopBack() called when size is equal to 0.");
 		}
 		return std::move(m_Data[--m_Size]);		// Return the moved value of m_Data at the decremented m_Size.
 	}
@@ -206,30 +204,30 @@ public:
 	T PopFront() {
 		// Check if m_Size is zero as there would be nothing to pop.
 		if (m_Size == 0) {
-			throw std::runtime_error("Vector Error: PopFront() called when size is equal to 0.");		// Throw a runtime error with the error message.
+			throw std::runtime_error("Vector Error: PopFront() called when size is equal to 0.");
 		}
 		T value = std::move(m_Data[0]);		// Save the value of the front of the Vector before overriding it.
 		// Iterate over the array from the front.
 		for (size_t i = 0; i < m_Size - 1; ++i) {
 			m_Data[i] = std::move(m_Data[i + 1]);		// Move the data at i one space to the left.
 		}
-		--m_Size;		// Decrement size
-		return value;		// Return the previously saved value that was at m_Data[0].
+		--m_Size;
+		return value;
 	}
 
-	// RemoveAt() Function
+	// RemoveAt(size_t) Function
 	// Remove the element at a given index.
 	void RemoveAt(size_t idx) {
 		// Check if the index given is greater or equal to m_Size.
 		// It is not necessary to check if it is less than 0 as it is unsigned.
 		if (idx >= m_Size) {
-			throw std::runtime_error("Vector Error: Index given to RemoveAt() is out of bounds.");		// Throw a runtime error with the error message.
+			throw std::runtime_error("Vector Error: Index given to RemoveAt() is out of bounds.");
 		}
 		// Iterate over the array from the index given.
 		for (size_t i = idx; i < m_Size - 1; ++i) {
 			m_Data[i] = std::move(m_Data[i + 1]);		// Move the data at i one space to the left.
 		}
-		--m_Size;		// Decrement m_Size.
+		--m_Size;
 	}
 
 	// Back() Function
@@ -237,9 +235,9 @@ public:
 	T& Back() {
 		// Check if m_Size is 0 as that would indicate that there is no back to the Vector.
 		if (m_Size == 0) {
-			throw std::runtime_error("Vector Error: Back() called when size is equal to 0.");		// Throw a runtime error with the error message.
+			throw std::runtime_error("Vector Error: Back() called when size is equal to 0.");
 		}
-		return m_Data[m_Size - 1];		// Return m_Data at m_Size - 1 as size is one greater than the index.
+		return m_Data[m_Size - 1];
 	}
 
 	// const Back() Function
@@ -247,9 +245,9 @@ public:
 	const T& Back() const {
 		// Check if m_Size is 0 as that would indicate that there is no back to the Vector.
 		if (m_Size == 0) {
-			throw std::runtime_error("Vector Error: Back() called when size is equal to 0.");		// Throw a runtime error with the error message.
+			throw std::runtime_error("Vector Error: Back() called when size is equal to 0.");
 		}
-		return m_Data[m_Size - 1];		// Return m_Data at m_Size - 1 as size is one greater than the index.
+		return m_Data[m_Size - 1];
 	}
 
 	// Front() Function
@@ -257,9 +255,9 @@ public:
 	T& Front() {
 		// Check if m_Size is 0 as that would indicate that there is no front of the Vector.
 		if (m_Size == 0) {
-			throw std::runtime_error("Vector Error: Front() called when size is equal to 0.");		// Throw a runtime error with the error message.
+			throw std::runtime_error("Vector Error: Front() called when size is equal to 0.");
 		}
-		return m_Data[0];		// Return the front of the Vector.
+		return m_Data[0];
 	}
 
 	// const Front() Function
@@ -267,33 +265,45 @@ public:
 	const T& Front() const {
 		// Check if m_Size is 0 as that would indicate that there is no front of the Vector.
 		if (m_Size == 0) {
-			throw std::runtime_error("Vector Error: Front() called when size is equal to 0.");		// Throw a runtime error with the error message.
+			throw std::runtime_error("Vector Error: Front() called when size is equal to 0.");
 		}
-		return m_Data[0];		// Return the front of the Vector.
+		return m_Data[0];
+	}
+
+	// Find(const T&) Function
+	// Finds the index of an element, returns m_Size if it is not found as m_Size is not a valid index.
+	// Note that this requires T to have an == operator.
+	size_t Find(const T& required) const {
+		for (size_t i = 0; i < m_Size; ++i) {
+			if (m_Data[i] == required) {
+				return static_cast<int>(i);
+			}
+		}
+		return m_Size;
 	}
 
 	// Clear() Function
 	// Clears the Vector by setting the size to 0.
 	void Clear() {
-		m_Size = 0;		// Set m_Size to 0, clearing the vector.
+		m_Size = 0;
 	}
 
 	// Empty() Function
 	// Returns if the Vector is empty.
 	bool Empty() const {
-		return m_Size == 0;		// Return if the vector is empty.
+		return m_Size == 0;
 	}
 
 	// Size() Function
 	// Returns the size of the Vector.
 	size_t Size() const {
-		return m_Size;		// Return the size.
+		return m_Size;
 	}
 
 	// Capacity() Function
 	// Returns the capacity of the Vector.
 	size_t Capacity() const {
-		return m_Capacity;		// Return the capacity.
+		return m_Capacity;
 	}
 
 private:
@@ -302,13 +312,13 @@ private:
 	void Grow() {
 		size_t newCapacity = (m_Capacity == 0) ? 1 : m_Capacity * 2;		// Get the new capacity of the Vector, which is 1 if it is already 0.
 		T* copy = new T[newCapacity];		// Create a pointer of type T with the size of the new capacity.
-		// Iterate over the original array.
+		// Iterate over the original array and deep copy each element to the copy array.
 		for (size_t i = 0; i < m_Size; ++i) {
-			assert(i < m_Capacity);		// Stupid assert to get rid of Intellisense warning.
-			copy[i] = m_Data[i];		// Deep copy the value of m_Data at i to the copy at i.
+			assert(i < m_Capacity);		// Stupid assert to get rid of the nonsense Intellisense warning.
+			copy[i] = m_Data[i];
 		}
-		delete[] m_Data;		// Delete the old array.
+		delete[] m_Data;
 		m_Data = copy;		// Set m_Data to the address of copy.
-		m_Capacity = newCapacity;		// Update the capacity to the new capacity.
+		m_Capacity = newCapacity;
 	}
 };
