@@ -9,27 +9,26 @@
 
 #include "Vector.h"		// Include Vector.h for the custom Vector implementation.
 
-#include <iostream>		// Include iostream for the std::cout stream.
+#include <iostream>		// For std::cout.
 
 struct Book;		// Forward declare the Book struct so that it can be used in the Person structure.
 
 struct Person {
-	std::string name;				// The name member is used to store the name of the author.
-	Vector<Book*> booksWritten;		// The booksWritten member is used to store a Vector of Book pointers to represent the books written by the author.
+	std::string name;				// Author's name.
+	Vector<Book*> booksWritten;		// Books authored by this person.
 
-	// Default Constructor
-	// Takes in a name and const reference to a Vector of Book pointers that is defaulted to an empty Vector.
+	// Default Constructor: Initialize name and optional books vector.
 	Person(const std::string& name, const Vector<Book*>& books = {})
-		: name(name), booksWritten(books) {}		// Assign the members to their corresponding values given by the params.
+		: name(name), booksWritten(books) {}
 
-	friend std::ostream& operator<<(std::ostream&, const Person&);		// Friend the output operator overload. This doesn't have to be done as there are no private members, but it is good for if any private members are added.
+	// Note that this does not specifically need to be marked as a friend as there are no private members. It is still good to mark it for if private members are added.
+	friend std::ostream& operator<<(std::ostream&, const Person&);
 };
 
-// InitPerson() Function
-// The assignment requested an initialize function, so here it is.
+// Initialize a Person (Assigment requires this, so I added it just in case).
 static void InitPerson(Person* person, const std::string& name, const Vector<Book*>& booksWritten) {
-	person->name = name;		// Set the person pointer's name to the given name.
-	person->booksWritten = booksWritten;		// Set the person's booksWritten to the given booksWritten.
+	person->name = name;		// Set the author's name.
+	person->booksWritten = booksWritten;		// Set author's books.
 }
 
 struct Book {
@@ -37,10 +36,9 @@ struct Book {
 	std::string title;			// The title member is used to store the title of the book.
 	uint32_t numberOfPages;		// The numberOfPages member is used to store the pages in the book. It is an unsigned int because it cannot be 0, and uint16_t is kind of small.
 
-	// Default Constructor
-	// Takes in a Person pointer for the author, a const reference to a string for the title, and a uint32_t for the pages.
+	// Default Constructor: initialize author, title, pages, and automatically add the book to the author's book Vector.
 	Book(Person* author, const std::string& title, uint32_t pages)
-		: author(author), title(title), numberOfPages(pages) {		// Assign the members to their corresponding values given by the params.
+		: author(author), title(title), numberOfPages(pages) {
 		// Check if the author is nullptr.
 		if (author) {
 			author->booksWritten.PushBack(this);		// Automatically push the created book to the back of the author's booksWritten.
@@ -50,53 +48,52 @@ struct Book {
 	friend std::ostream& operator<<(std::ostream&, const Book&);		// Friend the output operator overload. This doesn't have to be done as this there are no private members, but it is good for if any private members are added.
 };
 
-// InitBook() Function
-// The assignment requested an initialize function, so I implemented one.
+// Function to initialize a Book. The assignment required a function like this, so here it is.
 static void InitBook(Book* book, Person* author, const std::string& title, uint32_t numPages) {
-	book->author = author;				// Set the book's author pointer to the given author pointer.
-	book->title = title;				// Set the book's title member to the given title.
-	book->numberOfPages = numPages;		// Set the book's numberOfPages member to the given numPages.
+	book->author = author;				// Set the book's author pointer.
+	book->title = title;				// Set the book's title member.
+	book->numberOfPages = numPages;		// Set the book's numberOfPages member.
+	// Check if the author is nullptr.
+	if (author) {
+		author->booksWritten.PushBack(book);		// Push the book to the back of the author's booksWritten Vector.
+	}
 }
 
-// Book Operator Overload
-// Output the formatted contents of the book to the given output stream.
+// Book Operator Overload: Output the formatted contents of the book to the given output stream.
 std::ostream& operator<<(std::ostream& os, const Book& book) {
-	os << book.title << ", " << book.author->name << ", " << book.numberOfPages << " pages";		// Output the formatted contents of the book to the output stream.
-	return os;		// Return the output stream.
+	os << book.title << ", " << ((book.author) ? book.author->name : "Unknown") << ", " << book.numberOfPages << " pages";
+	return os;
 }
 
-// Person Operator Overload
-// Outputs the Person's name, and the books that they have wrote.
+// Person Operator Overload: Outputs the Person's name, and the books that they have written.
 std::ostream& operator<<(std::ostream& os, const Person& person) {
-	os << person.name << "(Total Books: " << person.booksWritten.Size() << ")\n";		// Output the Person's name.
+	os << person.name << "(Total Books: " << person.booksWritten.Size() << ")\n";
 	// Iterate over the books written by the person.
 	for (size_t i = 0; i < person.booksWritten.Size(); ++i) {
-		os << " - " << *person.booksWritten.At(i) << '\n';		// Output the books written by the person with a '-' in front, and an endline after.
+		os << " - " << *person.booksWritten.At(i) << '\n';
 	}
-	return os;		// Return the output stream.
+	return os;
 }
 
-// main() Function
-// This is the program's starting point.
 int main() {
-	// Note that for the following heap-allocated variables, I would normally use std::unique_ptr, but for the sake of simplicity I am not.
-	Person* king = new Person("Stephen King");			// Heap-allocate a new Person pointer with the name "Stephen King" and no initial booksWritten Vector.
-	Person* tolkien = new Person("J.R.R. Tolkien");		// Heap-allocate a new Person pointer with the name "J.R.R. Tolkien" and no initial booksWritten Vector.
+	// Create authors on the heap. Note that this is a good use-case for std::unique_ptr.
+	Person* king = new Person("Stephen King");
+	Person* tolkien = new Person("J.R.R. Tolkien");
 
-	Book* book1 = new Book(king, "It", 1024);		// Heap-allocate a new Book pointer with the author king, the name "It", and 1024 pages.
-	Book* book2 = new Book(king, "The Shining", 976);		// Heap-allocate a new Book pointer with the author king, the name "The Shining", and 976 pages.
-	Book* book3 = new Book(king, "Cujo", 450);		// Heap-allocate a new Book pointer with the author king, the name "Cujo", and 450 pages.
-	Book* book4 = new Book(tolkien, "Lord of the Rings: Fellowship of the Ring", 512);		// Heap-allocate a new Book pointer with the author tolkien, the "Lord of the Rings: Fellowship of the Ring", and 512 pages.name 
+	// Create books on the heap and automatically link them to the authors in the constructor.
+	Book* book1 = new Book(king, "It", 1024);
+	Book* book2 = new Book(king, "The Shining", 976);
+	Book* book3 = new Book(king, "Cujo", 450);
+	Book* book4 = new Book(tolkien, "Lord of the Rings: Fellowship of the Ring", 512);
 
-	std::cout << *king << *tolkien;			// Call the output overloads of the two authors. They do not need to be seperated by newlines as newlines are already printed in the overload.
+	// Display authors and their books.
+	std::cout << *king << '\n' << *tolkien;
 
-	// Free the heap-allocated memory to prevent memory leaks.
-	// Delete the books first to prevent undefined behaviour for the authors.
-	delete book1;		// Delete book1.
-	delete book2;		// Delete book2.
-	delete book3;		// Delete book3.
-	delete book4;		// Delete book4.
-
-	delete king;		// Delete king.
-	delete tolkien;		// Delete tolkien.
+	// Free the heap-allocated memory to prevent memory leaks (Delete the books first to prevent undefined behaviour for the authors).
+	delete book1;
+	delete book2;
+	delete book3;
+	delete book4;
+	delete king;
+	delete tolkien;
 }
