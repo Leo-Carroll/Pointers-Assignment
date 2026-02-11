@@ -1,82 +1,71 @@
-/******************************************************
-* Author: Leo Carroll
-* Program Description:
-*	A simple demonstration of pointers, operator 
-*	overloading, and forward declaration.
-*	It uses a custom Vector implementation as use of
-*	std::vector is prohibited.
-******************************************************/
+#include <iostream>
 
-#include "Vector.h"		// Include Vector.h for the custom Vector implementation.
+constexpr size_t NUM_MAX_BOOKS = 10;
 
-#include <iostream>		// For std::cout.
-
-struct Book;		// Forward declare the Book struct so that it can be used in the Person structure.
+struct Book;
 
 struct Person {
-	std::string name;				// Author's name.
-	Vector<Book*> booksWritten;		// Books authored by this person.
+	Book* booksWritten[NUM_MAX_BOOKS];
+	std::string name;
 
-	// Default Constructor: Initialize name and optional books vector.
-	Person(const std::string& name, const Vector<Book*>& books = {})
-		: name(name), booksWritten(books) {}
-
-	// Note that this does not specifically need to be marked as a friend as there are no private members. It is still good to mark it for if private members are added.
-	friend std::ostream& operator<<(std::ostream&, const Person&);
+	Person(Book*[NUM_MAX_BOOKS], size_t, const std::string&);
 };
 
 struct Book {
-	Person* author;				// Hold a pointer to the author to represent the author of the book.
-	std::string title;			// The title member is used to store the title of the book.
-	uint32_t numberOfPages;		// The numberOfPages member is used to store the pages in the book. It is an unsigned int because it cannot be 0, and uint16_t is kind of small.
+	Person* author;
+	std::string title;
+	uint32_t numberOfPages;
 
-	// Default Constructor: initialize author, title, pages, and automatically add the book to the author's book Vector.
-	Book(Person* author, const std::string& title, uint32_t pages)
-		: author(author), title(title), numberOfPages(pages) {
-		// Check if the author is nullptr.
-		if (author) {
-			author->booksWritten.PushBack(this);		// Automatically push the created book to the back of the author's booksWritten.
-		}
-	}
-
-	friend std::ostream& operator<<(std::ostream&, const Book&);		// Friend the output operator overload. This doesn't have to be done as this there are no private members, but it is good for if any private members are added.
+	Book(Person*, const std::string&, uint32_t);
 };
 
-// Book Operator Overload: Output the formatted contents of the book to the given output stream.
+Person::Person(Book* books[NUM_MAX_BOOKS], size_t numStartingBooks, const std::string& name) {
+	for (size_t i = 0; i < numStartingBooks; ++i) {
+		if (books[i]) {
+			this->booksWritten[i] = books[i];
+		}
+	}
+	for (size_t i = numStartingBooks; i < NUM_MAX_BOOKS; ++i) {
+		this->booksWritten[i] = nullptr;
+	}
+
+	this->name = name;
+}
+
+Book::Book(Person* author, const std::string& title, uint32_t pages) {
+	this->author = author;
+	this->title = title;
+	this->numberOfPages = pages;
+	if (this->author) {
+		size_t idx = 0;
+		while (author->booksWritten[idx++] != nullptr);
+		author->booksWritten[idx - 1] = this;
+	}
+}
+
 std::ostream& operator<<(std::ostream& os, const Book& book) {
-	os << book.title << ", " << ((book.author) ? book.author->name : "Unknown") << ", " << book.numberOfPages << " pages";
+	os << book.title << ", " << (book.author != nullptr ? book.author->name : "Unknown") << ", " << book.numberOfPages;
 	return os;
 }
 
-// Person Operator Overload: Outputs the Person's name, and the books that they have written.
-std::ostream& operator<<(std::ostream& os, const Person& person) {
-	os << person.name << "(Total Books: " << person.booksWritten.Size() << ")\n";
-	// Iterate over the books written by the person.
-	for (size_t i = 0; i < person.booksWritten.Size(); ++i) {
-		os << " - " << *person.booksWritten.At(i) << '\n';
+std::ostream& operator<<(std::ostream& os, const Person& author) {
+	os << author.name << '\n';
+	size_t idx = 0;
+	while (author.booksWritten[idx] != nullptr) {
+		os << " - " << *author.booksWritten[idx] << (author.booksWritten[idx + 1] != nullptr ? "\n" : "");
+		++idx;
 	}
 	return os;
 }
 
 int main() {
-	// Create authors on the heap. Note that this is a good use-case for std::unique_ptr.
-	Person* king = new Person("Stephen King");
-	Person* tolkien = new Person("J.R.R. Tolkien");
+	Person king({}, 0, "Stephen King");
+	Person tolkien({}, 0, "J.R.R. Tolkien");
 
-	// Create books on the heap and automatically link them to the authors in the constructor.
-	Book* book1 = new Book(king, "It", 1024);
-	Book* book2 = new Book(king, "The Shining", 976);
-	Book* book3 = new Book(king, "Cujo", 450);
-	Book* book4 = new Book(tolkien, "Lord of the Rings: Fellowship of the Ring", 512);
+	Book book1(&king, "It", 1024);
+	Book book2(&king, "The Shining", 976);
+	Book book3(&king, "Cujo", 450);
+	Book book4(&tolkien, "Lord of the Rings: Fellowship of the Ring", 512);
 
-	// Display authors and their books.
-	std::cout << *king << '\n' << *tolkien;
-
-	// Free the heap-allocated memory to prevent memory leaks (Delete the books first to prevent undefined behaviour for the authors).
-	delete book1;
-	delete book2;
-	delete book3;
-	delete book4;
-	delete king;
-	delete tolkien;
+	std::cout << king << '\n' << tolkien << '\n';
 }
