@@ -1,6 +1,6 @@
 #include <iostream>
 
-constexpr std::size_t MAX_BOOKS_WRITTEN = 10;
+constexpr std::size_t MAX_BOOKS_WRITTEN = 100;
 
 struct Book;
 
@@ -40,11 +40,8 @@ Book::Book(Person* author, const std::string& title, std::uint32_t pages) {
 
 	if (this->author) {
 		std::size_t idx = 0;
-		while (this->author->booksWritten[idx]) {
+		while (idx <= MAX_BOOKS_WRITTEN && this->author->booksWritten[idx]) {
 			++idx;
-			if (idx >= MAX_BOOKS_WRITTEN) {
-				break;
-			}
 		}
 		if (idx < MAX_BOOKS_WRITTEN) {
 			this->author->booksWritten[idx] = this;
@@ -57,7 +54,7 @@ std::ostream& operator<<(std::ostream&, const Person&);
 
 int main() {
 	Person king(nullptr, 0, "Stephen King");
-	Person tolkien(nullptr, 0, "J.R.R. Tolkien");
+	Person tolkien(nullptr, 3, "J.R.R. Tolkien");
 
 	Book book1(&king, "It", 1024);
 	Book book2(&king, "The Shining", 976);
