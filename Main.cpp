@@ -19,11 +19,11 @@ struct Book {
 	Book(Person*, const std::string&, std::uint32_t);
 };
 
-Person::Person(Book* books, std::size_t numBooks, const std::string& name) {
+Person::Person(Book* first, std::size_t numBooks, const std::string& name) {
 	std::size_t idx = 0;
-	if (books != nullptr) {
+	if (first != nullptr) {
 		for (idx = 0; idx < numBooks; ++idx) {
-			this->booksWritten[idx] = &books[idx];
+			this->booksWritten[idx] = &first[idx];
 		}
 	}
 	for (std::size_t i = idx; i < MAX_BOOKS_WRITTEN; ++i) {
@@ -39,9 +39,16 @@ Book::Book(Person* author, const std::string& title, std::uint32_t pages) {
 	this->numberOfPages = pages;
 
 	if (this->author) {
-		size_t idx = 0;
-		while (this->author->booksWritten[idx]) ++idx;
-		this->author->booksWritten[idx] = this;
+		std::size_t idx = 0;
+		while (this->author->booksWritten[idx]) {
+			++idx;
+			if (idx >= MAX_BOOKS_WRITTEN) {
+				break;
+			}
+		}
+		if (idx < MAX_BOOKS_WRITTEN) {
+			this->author->booksWritten[idx] = this;
+		}
 	}
 }
 
