@@ -8,7 +8,7 @@ struct Person {
 	Book* booksWritten[MAX_BOOKS_WRITTEN];
 	std::string name;
 
-	Person(Book*[MAX_BOOKS_WRITTEN], const std::string&);
+	Person(Book*, std::size_t, const std::string&);
 };
 
 struct Book {
@@ -19,11 +19,11 @@ struct Book {
 	Book(Person*, const std::string&, std::uint32_t);
 };
 
-Person::Person(Book* books[MAX_BOOKS_WRITTEN], const std::string& name) {
+Person::Person(Book* books, std::size_t numBooks, const std::string& name) {
 	std::size_t idx = 0;
 	if (books != nullptr) {
-		while (books[idx] != nullptr) {
-			this->booksWritten[idx] = books[idx++];
+		for (idx = 0; idx < numBooks; ++idx) {
+			this->booksWritten[idx] = &books[idx];
 		}
 	}
 	for (std::size_t i = idx; i < MAX_BOOKS_WRITTEN; ++i) {
@@ -49,8 +49,8 @@ std::ostream& operator<<(std::ostream&, const Book&);
 std::ostream& operator<<(std::ostream&, const Person&);
 
 int main() {
-	Person king({}, "Stephen King");
-	Person tolkien({}, "J.R.R. Tolkien");
+	Person king(nullptr, 0, "Stephen King");
+	Person tolkien(nullptr, 0, "J.R.R. Tolkien");
 
 	Book book1(&king, "It", 1024);
 	Book book2(&king, "The Shining", 976);
